@@ -30,8 +30,7 @@ from Auth.AuthHandler import LoginHandler
 from Auth.AuthHandler import AuthLogoutHandler
 from Auth.AuthHandler import AuthLoginFBHandler
 from Auth.AuthHandler import AuthLogoutFBHandler
-from Auth.AuthHandler import AuthLoginTWHandler
-from Auth.AuthHandler import AuthLogoutTWHandler
+
 
 
 
@@ -41,10 +40,8 @@ from Comment.CommentHandler import PostFeedHandler
 from Exception.ExceptionHandler import ExceptionPage
 
 
-from Social.SocialHandler import FaceBookGetFriendsHandler
 from Social.SocialHandler import FaceBookInviteHandler
 from Social.SocialHandler import FaceBookPostHandler
-from Social.SocialHandler import TwitterPostHandler
 from Social.SocialHandler import TripShareInviteHandler
 
 from Mail.MailHandler import EmailInviteHandler
@@ -54,13 +51,14 @@ import tornado.ioloop
 import tornado.options
 import tornado.web
 import bson
+import torndb
 from tornado.options import define, options
 
 define("port", default=8001, help="run on the given port", type=int)
-define("mysql_host", default="127.0.0.1:3306", help="trip database host")
-define("mysql_database", default="TripShare", help="trip database name")
-define("mysql_user", default="jason", help="trip database user")
-define("mysql_password", default="jason", help="trip database password")
+define("mysql_host", default="127.0.0.1:3306", help="daxi database host")
+define("mysql_database", default="daxi", help="daxi database name")
+define("mysql_user", default="jason", help="daxi database user")
+define("mysql_password", default="2143cy!@", help="daxi database password")
 define("google_client_id", help="your Google application API key", default="1072071824058-clak679f8h0lckdrm0ts21h73nah75ot.apps.googleusercontent.com")
 define("google_client_secret", help="your Google application secret", default="AY4dvAK_iBx-QlcUQiFVv8Ti")
 define("google_developer_key", help="your Google developer key", default="AIzaSyAyy9M1HZ1nDMdBwGMPDLamhFkCB8iQEJ0")
@@ -228,7 +226,7 @@ class Application(tornado.web.Application):
                                       (r"/dogood", DonationPageHandler),
                                       
                                       
-                                      (r"/like_glass", LikeTripHandler),
+                                      (r"/like_glass", LikeGlassHandler),
                                       
                                       (r"/addtowishlistrequest", AddToWishListRequestHandler),
                                       (r"/saveincartrequest", SaveInCartRequestHandler),
@@ -317,11 +315,11 @@ class Application(tornado.web.Application):
 
                             # Have one global connection to the blog DB across all handlers
                             #===================================================
-                            # self.db = tornado.database.Connection(
-                            #   host=options.mysql_host, database=options.mysql_database,
-                            #   user=options.mysql_user, password=options.mysql_password)
+                            self.db = torndb.Connection(
+                            host=options.mysql_host, database=options.mysql_database,
+                            user=options.mysql_user, password=options.mysql_password)
                             #===================================================
-                            self.db = asyncmongo.Client(pool_id='mytestdb', host='127.0.0.1', port=27017, maxcached=10, maxconnections=50, dbname='DaXi')
+                            #self.db = asyncmongo.Client(pool_id='mytestdb', host='127.0.0.1', port=27017, maxcached=10, maxconnections=50, dbname='DaXi')
                             #self.syncdb = pymongo.Connection("184.169.172.137", 27017).TripShare
                             #self.syncdb = pymongo.Connection("localhost", 27017).TripShare
                             
