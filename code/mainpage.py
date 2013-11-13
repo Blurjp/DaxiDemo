@@ -51,7 +51,7 @@ import tornado.ioloop
 import tornado.options
 import tornado.web
 import bson
-import torndb
+import Database.torndb
 from tornado.options import define, options
 
 define("port", default=8001, help="run on the given port", type=int)
