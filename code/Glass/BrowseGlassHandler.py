@@ -9,84 +9,31 @@ import logging
 import tornado.web
 import datetime
 import simplejson
-import MongoEncoder.MongoEncoder
-import pymongo
+import Common.BaseHandler
 
-class BaseHandler(tornado.web.RequestHandler):
-    @property
-    def db(self):
-        #=======================================================================
-        # if not hasattr(self, '_db'):
-        #    self._db = asyncmongo.Client(pool_id='mytestdb', host='127.0.0.1', port=27017, maxcached=10, maxconnections=50, dbname='TripShare')
-        #=======================================================================
-        #return self._db
-        return self.application.db
-    
-    @property
-    def syncdb(self):
-        return self.application.syncdb
 
-    
-    def get_current_user(self):
-        #self.clear_all_cookies()
-        user_id = self.get_secure_cookie("email")
-        if not user_id: return None
-        
-        #return tornado.escape.json_decode(user_id)
-        return self.syncdb.users.find_one({'user_id': bson.ObjectId(str(user_id))})
-    
-    
-    def get_current_username(self):
-        user_id = self.get_secure_cookie("user")
-        if not user_id: return None 
-        return self.syncdb.users.find_one({'user_id': bson.ObjectId(str(user_id))})["username"]
-        
-    def get_db_user_id(self):
-        user_id = self.get_secure_cookie("user")
-        return bson.ObjectId(str(user_id))
-    
-    def _on_response(self, response, error):
-        if error:
-            raise tornado.web.HTTPError(500)
-        #self.render('template', full_name=response['full_name'])
-        logging.info('response: +++++++++++++++++++++++=' + str(response))
-        
-    
-    def _on_action(self, response, error):
-        if error:
-            raise tornado.web.HTTPError(500)
-        #self.render('template', full_name=response['full_name'])
-        logging.info('_on_action: +++++++++++++++++++++++=' + str(response))
-        
-    def _get_trips(self, response, error):
-        if error:
-            raise tornado.web.HTTPError(500)
-        friends = self.current_user['friends']
-        self.render("browsetrip.html", trips=response, friends = friends)
-    
 
-     
 class BrowseHandler(BaseHandler):
-    @tornado.web.asynchronous
+    
     def get(self):
          
-            trips = self.db.query("SELECT trip_id, slug, title FROM trips where owner_id = %s ORDER BY published DESC LIMIT 10", self.current_user.user_id)
+        menglasses = self.db.query("SELECT thumbnail FROM glasses WHERE sex='m' LIMIT 20")
+        womenglasses = self.db.query("SELECT thumbnail FROM glasses WHERE sex = 'f' LIMIT 20")
+            #trips = self.db.query("SELECT trip_id, slug, title FROM trips where owner_id = %s ORDER BY published DESC LIMIT 10", self.current_user.user_id)
             #self.db.trips.find({'owner_id':self.get_db_user_id()}, limit = 10, sort = [('published', -1)], callback=self._get_trips)
-            self.db.trips.find({}, limit = 10, sort = [('published', -1)], callback=self._get_trips)
+            #self.db.trips.find({}, limit = 10, sort = [('published', -1)], callback=self._get_trips)
             
-        #self.render("browsetrip.html", trips=trips, token = self.xsrf_token)
+        self.render("browseglass.html", menglasses = menglasses, womenglasses = womenglasses, token = self.xsrf_token)
         
         
 class EntryHandler(BaseHandler):
     
     cart = None
-    @tornado.web.authenticated
-    @tornado.web.asynchronous
-    def get(self, slug):
-        if self.current_user:
-                self.cart = self.syncdb.get("SELECT cart from users where email = %s", self.current_user['email'])
+    def get(self, glassid):
+        
+        self.cart = self.syncdb.get("SELECT cart from users where email = %s", self.current_user['email'])
                
-                self.db.trips.find({'owner_id':self.get_db_user_id()}, limit = 10, sort = [('published', -1)], callback=self._trip_entry)   
+        self.db.query(SELECT thumbnail, picture, description FROM glasses WHERE glassid=%s, glassid)   
         
         
     def _trip_entry(self, response, error):

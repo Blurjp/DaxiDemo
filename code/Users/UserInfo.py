@@ -13,7 +13,7 @@ import tornado.web
 import MongoEncoder.MongoEncoder
 import Users.Notification
 import Users.Friend
-from Map.BrowseTripHandler import BaseHandler
+import Common.BaseHandler
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 
